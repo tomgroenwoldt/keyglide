@@ -73,7 +73,7 @@ pub enum AppMessage {
 impl App {
     pub async fn new(config: Config, size: Size) -> Result<Self> {
         let (tx, rx) = unbounded_channel();
-        let connection = Connection::new(tx.clone()).await?;
+        let connection = Connection::new(tx.clone(), &config).await?;
         let app = App {
             config,
             current_tab: Tab::Home,
@@ -194,7 +194,8 @@ impl App {
                         // Disconnect from existing lobby.
                         if key.eq(&self.config.key_bindings.lobby.disconnect) {
                             lobby.ws_tx.close().await?;
-                            self.connection = Connection::new(self.tx.clone()).await?;
+                            self.connection =
+                                Connection::new(self.tx.clone(), &self.config).await?;
                         }
                         // Whenever a lobby is about to start, ignore all key
                         // events except the disconnect one.
@@ -250,11 +251,11 @@ impl App {
                 self.focused_component = None;
                 if let Connection::Lobby(ref mut lobby) = self.connection {
                     lobby.ws_tx.close().await?;
-                    self.connection = Connection::new(self.tx.clone()).await?;
+                    self.connection = Connection::new(self.tx.clone(), &self.config).await?;
                 }
             }
             AppMessage::ServiceBackOnline => {
-                self.connection = Connection::new(self.tx.clone()).await?;
+                self.connection = Connection::new(self.tx.clone(), &self.config).await?;
 
                 #[cfg(feature = "audio")]
                 play_audio(&self.config, Audio::Reconnected)?;
@@ -262,10 +263,10 @@ impl App {
             AppMessage::ServiceDisconnected => {
                 // Make sure to unfocus components on disconnect.
                 self.focused_component = None;
-                self.connection = Connection::new(self.tx.clone()).await?;
+                self.connection = Connection::new(self.tx.clone(), &self.config).await?;
             }
             AppMessage::ConnectToLobby { join_mode } => {
-                let lobby = Lobby::new(self.tx.clone(), join_mode, self.size).await?;
+                let lobby = Lobby::new(self.tx.clone(), join_mode, self.size, &self.config).await?;
                 self.connection = Connection::Lobby(lobby);
                 self.focused_component = None;
             }
@@ -328,7 +329,7 @@ impl App {
                 lobby.on_tick();
             }
             Connection::Offline(ref mut offline) => {
-                offline.on_tick().await?;
+                offline.on_tick(&self.config).await?;
             }
         }
         Ok(())

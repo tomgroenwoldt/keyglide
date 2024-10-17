@@ -5,7 +5,7 @@ use log::{debug, error, info};
 use reqwest::{Client, StatusCode};
 use tokio::sync::mpsc::UnboundedSender;
 
-use crate::{app::AppMessage, constants::RECONNECT_INTERVAL};
+use crate::{app::AppMessage, config::Config, constants::RECONNECT_INTERVAL};
 
 pub struct Offline {
     /// HTTP client to check the service connection.
@@ -28,10 +28,18 @@ impl Offline {
         }
     }
 
-    pub async fn try_reconnect(&self) -> Result<()> {
+    pub async fn try_reconnect(&self, config: &Config) -> Result<()> {
         debug!("Try reconnect to backend service.");
 
-        let Ok(response) = self.client.get("http://127.0.0.1:3030/health").send().await else {
+        let Ok(response) = self
+            .client
+            .get(format!(
+                "http://{}:{}/health",
+                config.general.service.address, config.general.service.port
+            ))
+            .send()
+            .await
+        else {
             error!("Backend service unreachable.");
             // TODO: Return an error here.
             return Ok(());
@@ -44,10 +52,10 @@ impl Offline {
         Ok(())
     }
 
-    pub async fn on_tick(&mut self) -> Result<()> {
+    pub async fn on_tick(&mut self, config: &Config) -> Result<()> {
         // Try to reconnect every `RECONNECT_INTERVAL`.
         if self.last_reconnect.elapsed() > RECONNECT_INTERVAL {
-            self.try_reconnect().await?;
+            self.try_reconnect(config).await?;
             self.last_reconnect = Instant::now();
         }
 

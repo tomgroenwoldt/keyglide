@@ -1,4 +1,5 @@
 use anyhow::Result;
+use general::General;
 use key_bindings::KeyBindings;
 use serde::Deserialize;
 
@@ -7,6 +8,7 @@ use audio::Audio;
 
 #[cfg(feature = "audio")]
 mod audio;
+mod general;
 mod key_bindings;
 
 #[derive(Clone, Debug, Deserialize)]
@@ -15,6 +17,7 @@ pub struct Config {
     #[cfg(feature = "audio")]
     pub audio: Audio,
     pub key_bindings: KeyBindings,
+    pub general: General,
 }
 
 impl Config {

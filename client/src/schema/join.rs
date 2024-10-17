@@ -57,8 +57,12 @@ pub enum JoinMessage {
 }
 
 impl Join {
-    pub async fn new(app_tx: UnboundedSender<AppMessage>) -> Result<Self, Error> {
-        let (ws_stream, _) = connect_async("ws://127.0.0.1:3030/clients").await?;
+    pub async fn new(app_tx: UnboundedSender<AppMessage>, config: &Config) -> Result<Self, Error> {
+        let (ws_stream, _) = connect_async(format!(
+            "ws://{}:{}/clients",
+            config.general.service.address, config.general.service.port
+        ))
+        .await?;
         let (ws_tx, ws_rx) = ws_stream.split();
 
         let (tx, rx) = unbounded_channel();

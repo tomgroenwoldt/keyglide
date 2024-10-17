@@ -1,4 +1,22 @@
 # ──────────────────────────────────────────────────────────── #
+#                       General Settings                       #
+# ──────────────────────────────────────────────────────────── #
+#     The General Settings section allows users to define      #
+#  key configuration options that affect the overall behavior  #
+#   of the application. These settings may include parameters  #
+#  for application theme, language, logging levels, and more.  #
+# ──────────────────────────────────────────────────────────── #
+# Example:                                                     #
+#                                                              #
+#   [general]                                                  #
+#   service = { address = "127.0.0.1", port = 3030 }           #
+#                                                              #
+# ──────────────────────────────────────────────────────────── #
+
+[general]
+service = { address = "127.0.0.1", port = 3030 }
+
+# ──────────────────────────────────────────────────────────── #
 #                          Audio Section                       #
 # ──────────────────────────────────────────────────────────── #
 #    To use the audio feature, compile the client with the     #

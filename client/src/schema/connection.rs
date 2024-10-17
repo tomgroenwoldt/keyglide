@@ -3,7 +3,7 @@ use log::error;
 use tokio::sync::mpsc::UnboundedSender;
 
 use super::{join::Join, lobby::Lobby, offline::Offline};
-use crate::app::AppMessage;
+use crate::{app::AppMessage, config::Config};
 
 pub enum Connection {
     Join(Join),
@@ -18,8 +18,8 @@ impl Connection {
     /// `Connection::Offline` variant and spawns a task that tries to reconnect
     /// continously.
     /// Notifies the application on a successful reconnect.
-    pub async fn new(app_tx: UnboundedSender<AppMessage>) -> Result<Self> {
-        let connection = match Join::new(app_tx.clone()).await {
+    pub async fn new(app_tx: UnboundedSender<AppMessage>, config: &Config) -> Result<Self> {
+        let connection = match Join::new(app_tx.clone(), config).await {
             Ok(join) => Connection::Join(join),
             Err(e) => {
                 error!("Error connecting to backend service: {e}.");

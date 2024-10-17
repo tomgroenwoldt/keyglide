@@ -24,6 +24,7 @@ use super::{
 };
 use crate::{
     app::AppMessage,
+    config::Config,
     schema::{
         focused_component::{ComponentKind, FocusedComponent},
         goal::Goal,
@@ -78,13 +79,20 @@ impl Lobby {
         app_tx: UnboundedSender<AppMessage>,
         join_mode: JoinMode,
         app_size: Size,
+        config: &Config,
     ) -> Result<Self> {
         // First, fetch lobby information of the lobby we want to join.
-        let url = format!("http://127.0.0.1:3030/lobbies/{}", join_mode);
+        let url = format!(
+            "http://{}:{}/lobbies/{}",
+            config.general.service.address, config.general.service.port, join_mode
+        );
         let lobby_information = reqwest::get(url).await?.json::<LobbyInformation>().await?;
 
         // Connect to lobby with given join mode.
-        let url = format!("ws://127.0.0.1:3030/players/{}", lobby_information.id);
+        let url = format!(
+            "ws://{}:{}/players/{}",
+            config.general.service.address, config.general.service.port, lobby_information.id
+        );
         let (ws_stream, _) = connect_async(url).await?;
 
         // Setup messaging channels.
