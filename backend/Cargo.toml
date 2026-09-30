@@ -1,0 +1,35 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-only"
+publish = false
+
+[dependencies]
+anyhow = "1"
+axum = { version = "0.8.4", features = ["macros", "multipart", "ws"] }
+axum-tungstenite = { git = "https://github.com/tomgroenwoldt/axum-tungstenite.git", branch = "bump-to-axum-0.8" }
+base64 = "0.22.1"
+chrono = { version = "0.4.41", features = ["serde"] }
+common = { path = "../common" }
+clap = { version = "4.5.21", features = ["derive", "env"] }
+dotenv = "0.15.0"
+env_logger = "0.11.5"
+futures = "0.3.31"
+headers = "0.4.1"
+http = "1.0.0"
+log = "0.4.22"
+mime_guess = "2.0.5"
+# build libpq and openssl as part of the build process
+# uncomment these lines if you run into setup issues
+# pq-sys = { version = "0.6", features = ["bundled"] }
+openssl = { version = "0.10.68", features = ["vendored"] }
+postgrest = "1.6.0"
+rust-embed = { version = "8.5.0", features = ["axum-ex"] }
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+serde_urlencoded = "0.7.1"
+tokio = { version = "1.41.1", features = ["full"] }
+tokio-tungstenite = "0.27.0"
+jsonwebtoken = { version = "10.3.0", features = ["rust_crypto"] }
+uuid = { version = "1.18.0", features = ["v4", "serde"] }

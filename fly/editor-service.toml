@@ -1,0 +1,32 @@
+# Editor service: runs Helix in a PTY inside a bubblewrap sandbox.
+#
+# Deploy from the repository root:
+#   fly deploy --config fly/editor-service.toml --dockerfile editor-service/Dockerfile
+#
+# Deliberately has no [http_service] and no public ports. The backend reaches
+# it over Fly's private network at keyglide-editor.internal:3001; nothing else
+# can. This service executes an editor on behalf of anonymous users, so it
+# should never be directly reachable.
+#
+# The sandbox needs no special configuration here. Under Docker, bubblewrap
+# requires --cap-add=SYS_ADMIN and --security-opt seccomp=unconfined, because
+# the daemon drops the capability and its seccomp profile blocks pivot_root. A
+# Fly Machine is a Firecracker microVM with its own kernel, so neither
+# restriction applies. Verified on a throwaway app: helix starts under bwrap
+# with the same bind set the code uses, resolving its config, themes and
+# runtime inside the sandbox.
+
+app = "keyglide-editor"
+primary_region = "fra"
+
+[build]
+  dockerfile = "../editor-service/Dockerfile"
+
+[env]
+  RUST_LOG = "info"
+
+# One Helix process plus a PTY per live session, so this is the memory-hungry
+# half of the system. Raise this before raising the backend.
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"

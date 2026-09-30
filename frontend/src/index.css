@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 276 100% 95%;
+        --foreground: 276 5% 7%;
+        --card: 276 50% 90%;
+        --card-foreground: 276 5% 10%;
+        --popover: 276 100% 95%;
+        --popover-foreground: 276 100% 7%;
+        --primary: 276 38.2% 21.6%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 276 30% 70%;
+        --secondary-foreground: 0 0% 0%;
+        --muted: 238 30% 85%;
+        --muted-foreground: 276 5% 35%;
+        --accent: 238 30% 80%;
+        --accent-foreground: 276 5% 10%;
+        --destructive: 0 100% 30%;
+        --destructive-foreground: 276 5% 90%;
+        --border: 276 30% 50%;
+        --input: 276 30% 18%;
+        --ring: 276 38.2% 21.6%;
+        --radius: 0rem;
+    }
+    .dark {
+        --background: 276 50% 7%;
+        --foreground: 276 5% 90%;
+        --card: 276 50% 9%;
+        --card-foreground: 276 5% 90%;
+        --popover: 276 50% 5%;
+        --popover-foreground: 276 5% 90%;
+        --primary: 276 38.2% 21.6%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 276 30% 10%;
+        --secondary-foreground: 0 0% 100%;
+        --muted: 238 30% 15%;
+        --muted-foreground: 276 5% 60%;
+        --accent: 238 30% 15%;
+        --accent-foreground: 276 5% 90%;
+        --destructive: 0 100% 30%;
+        --destructive-foreground: 276 5% 90%;
+        --border: 276 30% 18%;
+        --input: 276 30% 18%;
+        --ring: 276 38.2% 21.6%;
+        --radius: 0rem;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+    html {
+        @apply scroll-smooth;
+    }
+    body {
+        @apply bg-background text-foreground overscroll-none;
+        /* font-feature-settings: "rlig" 1, "calt" 1; */
+        font-synthesis-weight: none;
+        text-rendering: optimizeLegibility;
+    }
+
+    @supports (font: -apple-system-body) and (-webkit-appearance: none) {
+        [data-wrapper] {
+            @apply min-[1800px]:border-t;
+        }
+    }
+
+    /* Custom scrollbar styling. Thanks @pranathiperii. */
+    ::-webkit-scrollbar {
+        width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: hsl(var(--border));
+        border-radius: 5px;
+    }
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: hsl(var(--border)) transparent;
+    }
+}
+
+@layer utilities {
+    .step {
+        counter-increment: step;
+    }
+
+    .step:before {
+        @apply absolute w-9 h-9 bg-muted rounded-full font-mono font-medium text-center text-base inline-flex items-center justify-center -indent-px border-4 border-background;
+        @apply ml-[-50px] mt-[-4px];
+        content: counter(step);
+    }
+
+    .chunk-container {
+        @apply shadow-none;
+    }
+
+    .chunk-container::after {
+        content: "";
+        @apply absolute -inset-4 shadow-xl rounded-xl border;
+    }
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+    }
+
+    .border-grid {
+        @apply border-border/30 dark:border-border border-dashed;
+    }
+
+    .container-wrapper {
+        @apply max-w-[1400px] min-[1800px]:max-w-screen-2xl min-[1400px]:border-x border-border/70 dark:border-border mx-auto w-full border-dashed;
+    }
+
+    .container {
+        @apply px-4 xl:px-6 mx-auto max-w-screen-2xl;
+    }
+}

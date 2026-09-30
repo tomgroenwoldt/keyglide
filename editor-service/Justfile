@@ -1,0 +1,16 @@
+lint:
+	cargo clippy
+
+run:
+	cargo run
+
+# Runs the sandbox with the least privilege that works. bubblewrap needs
+# CAP_SYS_ADMIN to create its namespace, and Docker's default seccomp profile
+# blocks the pivot_root it then performs. Those two together are enough;
+# --privileged is not required and would hand the container everything.
+start-container:
+	docker rm -f editor-service
+	docker run -d --name editor-service --rm -p 3001:3001 \
+	    --cap-drop=all --cap-add=SYS_ADMIN \
+	    --security-opt seccomp=unconfined \
+	    editor-service:latest

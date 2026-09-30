@@ -1,0 +1,71 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Which service to deploy
+        type: choice
+        options: [both, backend, editor-service]
+        default: both
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  editor-service:
+    name: Deploy editor-service
+    if: >-
+      github.event_name == 'push' ||
+      contains(fromJSON('["both","editor-service"]'), inputs.service)
+    runs-on: ubuntu-latest
+    # The Fly tokens live as environment secrets here rather than repository
+    # secrets, so they are reachable only from a run targeting this
+    # environment. Restrict the environment to the main branch, and add
+    # required reviewers if you want deploys to need an approval.
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --config fly/editor-service.toml --dockerfile editor-service/Dockerfile --remote-only
+        env:
+          # App-scoped deploy token. A Fly `deploy` token covers one app; an
+          # `org` token would also grant deploy rights to every other app in
+          # the organisation, so there is one token per app here.
+          FLY_API_TOKEN: ${{ secrets.FLY_TOKEN_EDITOR }}
+
+  backend:
+    name: Deploy backend
+    if: >-
+      github.event_name == 'push' ||
+      contains(fromJSON('["both","backend"]'), inputs.service)
+    # The backend proxies to the editor service, so that one goes first.
+    needs: [editor-service]
+    # One condition, because a second `if:` key would silently replace this
+    # one. `always()` keeps a backend-only manual run from being blocked by
+    # the editor-service job being skipped.
+    if: >-
+      always() && !failure() && !cancelled() &&
+      (github.event_name == 'push' ||
+       contains(fromJSON('["both","backend"]'), inputs.service))
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      # Baked into the binary at build time, so they are build args rather
+      # than secrets. Both are public values.
+      - run: |
+          flyctl deploy --config fly/backend.toml --dockerfile Dockerfile --remote-only \
+            --build-arg VITE_SUPABASE_URL="$VITE_SUPABASE_URL" \
+            --build-arg VITE_SUPABASE_PUBLISHABLE_KEY="$VITE_SUPABASE_PUBLISHABLE_KEY" \
+            --build-arg VITE_GA_MEASUREMENT_ID="$VITE_GA_MEASUREMENT_ID"
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_TOKEN_BACKEND }}
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          VITE_GA_MEASUREMENT_ID: ${{ vars.GA_MEASUREMENT_ID }}

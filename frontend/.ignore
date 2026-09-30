@@ -1,0 +1,2 @@
+# Ignore shadcn/ui components in editors.
+src/components/ui

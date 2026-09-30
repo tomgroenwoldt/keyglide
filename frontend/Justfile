@@ -1,0 +1,20 @@
+build:
+    pnpm run build
+
+check-format:
+    pnpm run check-format
+
+format:
+    pnpm run format
+
+install:
+    pnpm install
+
+lint:
+    pnpm run lint
+
+run:
+    pnpm run dev
+
+shadcn-add *args:
+    pnpm dlx shadcn@latest add {{args}}

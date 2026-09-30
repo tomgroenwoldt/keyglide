@@ -1,0 +1,20 @@
+theme = "custom"
+
+[editor]
+true-color = true
+insert-final-newline = false
+
+[editor.whitespace]
+render = "all"
+
+[editor.whitespace.characters]
+space = "·"
+nbsp = "⍽"
+nnbsp = "␣"
+tab = "→"
+newline = "⏎"
+tabpad = "·" # Tabs will look like "→···" (depending on tab width)
+
+[editor.auto-save.after-delay]
+enable = true
+timeout = 250

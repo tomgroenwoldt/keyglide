@@ -1,0 +1,26 @@
+[package]
+name = "editor-service"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-only"
+publish = false
+
+[dependencies]
+anyhow = "1.0.98"
+axum = { version = "0.8.4", features = ["macros", "ws"] }
+base64 = "0.22.1"
+common = { path = "../common" }
+dotenv = "0.15.0"
+env_logger = "0.11.5"
+futures = "0.3.31"
+libc = "0.2.169"
+log = "0.4.25"
+notify = "8.0.0"
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.135"
+strsim = "0.11.1"
+tempfile = "3.15.0"
+tokio = { version = "1.41.1", features = ["full"] }
+
+[dev-dependencies]
+tokio-tungstenite = "0.26.1"

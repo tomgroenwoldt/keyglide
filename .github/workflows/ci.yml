@@ -1,0 +1,134 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          # The version comes from the packageManager field in this manifest.
+          package_json_file: frontend/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 23
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        working-directory: frontend
+        run: pnpm run check-format
+
+      - name: Lint
+        working-directory: frontend
+        run: pnpm run lint
+
+      - name: Build
+        working-directory: frontend
+        run: pnpm run build
+
+      # The backend embeds frontend/dist at compile time, so the backend job
+      # cannot build without it.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+          retention-days: 1
+
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    needs: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+
+      - name: Check formatting
+        working-directory: backend
+        run: cargo fmt --check
+
+      - name: Clippy
+        working-directory: backend
+        run: cargo clippy --all-targets -- -D warnings
+
+  editor-service:
+    name: Editor service
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: editor-service
+
+      - name: Check formatting
+        working-directory: editor-service
+        run: cargo fmt --check
+
+      - name: Clippy
+        working-directory: editor-service
+        run: cargo clippy --all-targets -- -D warnings
+
+      # The integration tests drive a real Helix under bwrap at paths that only
+      # exist inside the editor-service image (/usr/bin/helix,
+      # /root/.config/helix). They compile here; run them in the container with
+      # `just build-editor-service` locally.
+      - name: Build tests
+        working-directory: editor-service
+        run: cargo test --no-run
+
+  common:
+    name: Common
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: common
+
+      - name: Check formatting
+        working-directory: common
+        run: cargo fmt --check
+
+      - name: Clippy
+        working-directory: common
+        run: cargo clippy --all-targets -- -D warnings

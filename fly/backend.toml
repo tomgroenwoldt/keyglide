@@ -1,0 +1,40 @@
+# Backend + embedded frontend.
+#
+# Deploy from the repository root:
+#   fly deploy --config fly/backend.toml --dockerfile Dockerfile \
+#     --build-arg VITE_SUPABASE_URL=... --build-arg VITE_SUPABASE_PUBLISHABLE_KEY=...
+#
+# The frontend is compiled into the binary, so those two values are baked in at
+# build time and cannot be changed with `fly secrets`.
+
+app = "keyglide"
+primary_region = "fra"
+
+[build]
+  dockerfile = "../Dockerfile"
+
+[env]
+  RUST_LOG = "info"
+  # Private 6PN address of the editor-service app. Never leaves Fly's
+  # WireGuard mesh, so the sandbox is not reachable from the internet.
+  EDITOR_SERVICE_ADDR = "keyglide-editor.internal:3001"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  # The daily worker lives in this process: it resets streaks and gives the
+  # top-voted queued challenge a date at 01:00 UTC. A stopped machine runs no
+  # worker, so this one stays up.
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "connections"
+    # Each player holds an open websocket for the whole session.
+    hard_limit = 250
+    soft_limit = 200
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

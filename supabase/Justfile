@@ -1,0 +1,8 @@
+# Generates an ES256 JWT signing key into supabase/signing_key.json.
+#
+# The CLI writes the file itself, as a JSON array. It needs the file to exist
+# first, so seed it with an empty array on a fresh checkout:
+#
+#     echo '[]' > supabase/signing_key.json
+generate-signing-key:
+    supabase gen signing-key --algorithm ES256

@@ -1,0 +1,7 @@
+# Supabasex
+.branches
+.temp
+
+# dotenvx
+.env
+signing_key.json
