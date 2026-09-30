@@ -39,9 +39,6 @@ jobs:
 
   backend:
     name: Deploy backend
-    if: >-
-      github.event_name == 'push' ||
-      contains(fromJSON('["both","backend"]'), inputs.service)
     # The backend proxies to the editor service, so that one goes first.
     needs: [editor-service]
     # One condition, because a second `if:` key would silently replace this
