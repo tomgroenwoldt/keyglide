@@ -2,10 +2,11 @@ import { ModeSwitcher } from "./mode-switcher";
 import KeyglideLogo from "./keyglide-logo";
 import {
     Coffee,
+    Github,
+    Library,
     Lightbulb,
     LogOut,
     Settings,
-    Library,
     Upload,
 } from "lucide-react";
 import { useAppStore } from "@/store";
@@ -75,6 +76,20 @@ export function Header() {
                     <div className="flex flex-1 items-center justify-between gap-2 md:justify-end">
                         <div className="w-full flex-1 md:w-auto md:flex-none"></div>
                         <nav className="flex items-center gap-2">
+                            <a
+                                target="_blank"
+                                rel="noreferrer"
+                                href="https://github.com/tomgroenwoldt/keyglide"
+                                aria-label="Keyglide on GitHub"
+                            >
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    title="Source on GitHub"
+                                >
+                                    <Github />
+                                </Button>
+                            </a>
                             <a
                                 target="_blank"
                                 rel="noreferrer"
